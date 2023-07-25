@@ -1,0 +1,31 @@
+name: Copy Commits to Azure Blob Storage
+
+on:
+  push:
+    branches:
+      - main # Change this to your main branch name
+
+jobs:
+  copy_to_blob_storage:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Azure CLI
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Copy commits to Blob Storage
+      run: |
+        # Install Azure CLI extensions for storage
+        az extension add --name storage-preview
+
+        # Get the latest commit SHA
+        commit_sha=$(git rev-parse HEAD)
+
+        # Copy the files to Azure Blob Storage
+        az storage blob upload-batch --account-name fbdevopstest --account-key TpJjigeI0CEN37y419pZ3Vt7nCmei8ajgSP5GNwmRY0HaR6lQ7Dfy9oOrxVDkh66TdWpOCw3bywP+ASt8xwjWg== --destination devops --source . --pattern "*" --destination-path "commits/$commit_sha/"
+
+  # Additional steps can be added here if needed
